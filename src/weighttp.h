@@ -52,6 +52,7 @@ struct Config {
 	uint8_t thread_count;
 	uint16_t concur_count;
 	uint8_t keep_alive;
+	uint16_t req_interval;
 
 	char *request;
 	uint32_t request_size;

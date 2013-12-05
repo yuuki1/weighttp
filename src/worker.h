@@ -39,6 +39,6 @@ struct Worker {
 };
 
 
-Worker *worker_new(uint8_t id, Config *config, uint16_t num_clients, uint64_t num_requests);
+Worker *worker_new(uint8_t id, Config *config, uint16_t num_clients, uint64_t num_requests, uint16_t request_interval);
 void worker_free(Worker *worker);
 void *worker_thread(void* arg);

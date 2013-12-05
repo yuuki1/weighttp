@@ -10,13 +10,14 @@
 
 #include "weighttp.h"
 
-Worker *worker_new(uint8_t id, Config *config, uint16_t num_clients, uint64_t num_requests) {
+Worker *worker_new(uint8_t id, Config *config, uint16_t num_clients, uint64_t num_requests, uint16_t req_interval) {
 	Worker *worker;
 	uint16_t i;
 
 	worker = W_MALLOC(Worker, 1);
 	worker->id = id;
 	worker->loop = ev_loop_new(0);
+    ev_set_io_collect_interval(worker->loop, req_interval);
 	ev_ref(worker->loop);
 	worker->config = config;
 	worker->num_clients = num_clients;

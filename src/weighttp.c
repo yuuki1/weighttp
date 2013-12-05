@@ -15,6 +15,7 @@ extern int optind, optopt; /* getopt */
 static void show_help(void) {
 	printf("weighttp <options> <url>\n");
 	printf("  -n num   number of requests    (mandatory)\n");
+	printf("  -i secs  interval  of requests        (default: 0)\n");
 	printf("  -t num   threadcount           (default: 1)\n");
 	printf("  -c num   concurrent clients    (default: 1)\n");
 	printf("  -k       keep alive            (default: no)\n");
@@ -93,7 +94,7 @@ static char *forge_request(char *url, char keep_alive, char **host, uint16_t *po
 	len = strlen(url);
 
 	if ((c = strchr(url, ':'))) {
-		/* found ':' => host:port */ 
+		/* found ':' => host:port */
 		*host = W_MALLOC(char, c - url + 1);
 		memcpy(*host, url, c - url);
 		(*host)[c - url] = '\0';
@@ -245,9 +246,10 @@ int main(int argc, char *argv[]) {
 	config.thread_count = 1;
 	config.concur_count = 1;
 	config.req_count = 0;
+	config.req_interval = 0;
 	config.keep_alive = 0;
 
-	while ((opt = getopt(argc, argv, ":hv6kn:t:c:H:")) != -1) {
+	while ((opt = getopt(argc, argv, ":hv6kn:i:t:c:H:")) != -1) {
 		switch (opt) {
 			case 'h':
 				show_help();
@@ -275,6 +277,9 @@ int main(int argc, char *argv[]) {
 				headers = W_REALLOC(headers, char*, headers_num+1);
 				headers[headers_num] = optarg;
 				headers_num++;
+				break;
+			case 'i':
+				config.req_interval = atoi(optarg);
 				break;
 			case '?':
 				if ('?' != optopt) W_ERROR("unkown option: -%c\n", optopt);
@@ -365,7 +370,7 @@ int main(int argc, char *argv[]) {
 			rest_req -= 1;
 		}
 		printf("spawning thread #%d: %"PRIu16" concurrent requests, %"PRIu64" total requests\n", i+1, concur, reqs);
-		workers[i] = worker_new(i+1, &config, concur, reqs);
+		workers[i] = worker_new(i+1, &config, concur, reqs, config.req_interval);
 
 		if (!(workers[i])) {
 			W_ERROR("%s", "failed to allocate worker or client");
